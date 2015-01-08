@@ -1,6 +1,6 @@
 if myHero.charName ~= "Nasus" then return end
 
-local version = 1.05
+local version = 1.06
 local AUTOUPDATE = true
 
 require "SOW"
@@ -199,9 +199,9 @@ function OnTick()
   
   if config.escape then escape() end
   
-  if Rready and config.comboset.autoR then autoult() end
+  if Rready and config.combo.autoR then autoult() end
   
-  if config.comboset.ks then ks() end
+  if config.combo.ks then ks() end
     
   
   Qready = (myHero:CanUseSpell(_Q) == READY)
@@ -250,7 +250,7 @@ function autoult()
 
   EnemiesInR = AreaEnemyCount(myHero, 400)
 
-  if Rready and EnemiesInR >= config.comboset.minR and myHero.health < (myHero.maxHealth * (60 / 100)) then
+  if Rready and EnemiesInR >= config.combo.minR and myHero.health < (myHero.maxHealth * (60 / 100)) then
     CastSpell(_R)
   end
 end
@@ -281,11 +281,11 @@ function ks()
     if GetDistance(enemy) < 650 then
       local qDmg = getDmg("Q", enemy, myHero)
       local eDmg = getDmg("E", enemy, myHero)
-      if enemy and not enemy.dead and GetDistanceSqr(enemy) <= TRUE_RANGE^2 and enemy.health <= qDmg and config.comboset.ks then
+      if enemy and not enemy.dead and GetDistanceSqr(enemy) <= TRUE_RANGE^2 and enemy.health <= qDmg and config.combo.ks then
           CastSpell(_Q)
           packetAttack(enemy)
       end
-      if enemy ~= nil and not enemy.dead and GetDistance(enemy) < 650 and enemy.health <= eDmg and config.comboset.ks then
+      if enemy ~= nil and not enemy.dead and GetDistance(enemy) < 650 and enemy.health <= eDmg and config.combo.ks then
         CastSpell(_E, enemy.x, enemy.z)
       end
     end
@@ -377,7 +377,7 @@ function OnProcessSpell(unit, spell)
         lastWindUpTime = spell.windUpTime * 1000
         lastAttackCD = spell.animationTime * 1000
     end
-    if menu.comboset.gapClose and Wready then
+    if menu.combo.gapClose and Wready then
       if unit.team ~= myHero.team then
         local spellName = spell.name
         if DashList[unit.charName] and spellName == DashList[unit.charName].spell and GetDistance(unit) < 2000 then
