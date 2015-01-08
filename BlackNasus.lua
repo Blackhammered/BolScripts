@@ -19,7 +19,7 @@ end
 if DOWNLOADING_SOURCELIB then print("Downloading required libraries, please wait...") return end
 
 if AUTOUPDATE then
-  SourceUpdater(SCRIPT_NAME, version, "raw.github.com", "---------CHANGE THIS---------"..SCRIPT_NAME..".lua", SCRIPT_PATH .. GetCurrentEnv().FILE_NAME, "---------CHANGE THIS--------"..SCRIPT_NAME..".version"):CheckUpdate()
+  SourceUpdater(SCRIPT_NAME, version, "raw.github.com", "/Blackhammered/BolScripts/master/"..SCRIPT_NAME..".lua", SCRIPT_PATH .. GetCurrentEnv().FILE_NAME, "/Blackhammered/BolScripts/master/"..SCRIPT_NAME..".version"):CheckUpdate()
 end
 
 local RequireI = Require("SourceLib")
