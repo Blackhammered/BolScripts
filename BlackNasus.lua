@@ -96,7 +96,7 @@ local lastAttack     = 0
 local lastWindUpTime = 0
 local lastAttackCD   = 0
 
-local bugger = {}
+local debug = {}
 
 ---------------------------------------
 --Constants--
@@ -150,14 +150,14 @@ function OnLoad()
 			config.comboset:addParam("minR", "Auto Ult when x # of enemies in range", SCRIPT_PARAM_SLICE, 1, 0, 5, 0)
         	config.comboset:addParam("ks", "KS with Q and E", SCRIPT_PARAM_ONOFF, false)
         	config.comboset:addParam("gapClose", "Auto W Gapclosers", SCRIPT_PARAM_ONOFF, false)
-        config:addSubMenu("bugger Info", "bugger")
-        	config.bugger:addParam("lastdmg",     "Last Q damage calculated: ", SCRIPT_PARAM_INFO, 0);
-        	config.bugger:addParam("sep", "", SCRIPT_PARAM_INFO, "");
-        	config.bugger:addParam("jungleCount", "Jungle minions around you: ", SCRIPT_PARAM_INFO, 0)
-        	config.bugger:addParam("sep", "", SCRIPT_PARAM_INFO, "");
-        	config.bugger:addParam("attackSpeed", "Attack Speed: ", SCRIPT_PARAM_INFO, 0);
-        	config.bugger:addParam("cooldownQ", "Cooldown for Q: ", SCRIPT_PARAM_INFO, 0)
-        	config.bugger:addParam("hitsWhileCD", "AA hits while Q cooldown: ", SCRIPT_PARAM_INFO, 0);
+        config:addSubMenu("Debug Info", "debug")
+        	config.debug:addParam("lastdmg",     "Last Q damage calculated: ", SCRIPT_PARAM_INFO, 0);
+        	config.debug:addParam("sep", "", SCRIPT_PARAM_INFO, "");
+        	config.debug:addParam("jungleCount", "Jungle minions around you: ", SCRIPT_PARAM_INFO, 0)
+        	config.debug:addParam("sep", "", SCRIPT_PARAM_INFO, "");
+        	config.debug:addParam("attackSpeed", "Attack Speed: ", SCRIPT_PARAM_INFO, 0);
+        	config.debug:addParam("cooldownQ", "Cooldown for Q: ", SCRIPT_PARAM_INFO, 0)
+        	config.debug:addParam("hitsWhileCD", "AA hits while Q cooldown: ", SCRIPT_PARAM_INFO, 0);
 
 
         config:addParam("enabled", "Enable Q Stacking", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("V"))
@@ -172,13 +172,13 @@ end
 
 function OnTick()
 
-    -- Update bugger config
+    -- Update debug config
 
-        config.bugger.lastdmg = bugger["LastDamage"]
-    if jungleLib then config.bugger.jungleCount = jungleLib:MobCount(true, TRUE_RANGE * 2) end
-    config.bugger.attackSpeed = attackSpeed
-    config.bugger.hitsWhileCD = bugger["HitsWhileCooldown"]
-    config.bugger.cooldownQ   = bugger["CooldownQ"]
+    config.debug.lastdmg = debug["lastdmg"]
+    if jungleLib then config.debug.jungleCount = jungleLib:MobCount(true, TRUE_RANGE * 2) end
+    config.debug.attackSpeed = attackSpeed
+    config.debug.hitsWhileCD = debug["HitsWhileCooldown"]
+    config.debug.cooldownQ   = debug["CooldownQ"]
     -- Update minion managers
     enemyMinions:update()
     ts:update()
@@ -315,13 +315,13 @@ function timeForPerfectQ()
                 if not buffActive and player:CanUseSpell(_Q) == READY then
                     packetCast(_Q)
                     packetAttack(minion)
-                    bugger["LastDamage"] = damage
+                    debug["lastdmg"] = damage
                     break
                 end
 
                 if buffActive then
                     packetAttack(minion)
-                    bugger["LastDamage"] = damage
+                    debug["lastdmg"] = damage
                     break
                 end
             end
@@ -335,10 +335,10 @@ end
 function clearJungle()
 
     local cooldownQ         = player:GetSpellData(_Q).totalCooldown
-    bugger["CooldownQ"]      = cooldownQ
+    debug["CooldownQ"]      = cooldownQ
 
     local hitsWhileCooldown    = math.floor(cooldownQ / (1 / attackSpeed))
-    bugger["HitsWhileCooldown"] = hitsWhileCooldown
+    debug["HitsWhileCooldown"] = hitsWhileCooldown
 
     for _, mob in pairs(jungleLib:GetJungleMobs(true, TRUE_RANGE * 2)) do
 
@@ -351,12 +351,12 @@ function clearJungle()
             if (damageQ >= mob.health or mob.health > damageWhileCooldown + damageQ) and (player:CanUseSpell(_Q) == READY or buffActive) then
                 if not buffActive then packetCast(_Q) end
                 packetAttack(mob)
-                bugger["LastDamage"] = damageQ
+                debug["lastdmg"] = damageQ
                 return
             elseif GetTickCount() + GetLatency() / 2 > lastAttack + lastAttackCD then
                 if mob.health > damageAA then
                     packetAttack(mob)
-                    bugger["LastDamage"] = damageQ
+                    debug["lastdmg"] = damageQ
                     return
                 end
             else
