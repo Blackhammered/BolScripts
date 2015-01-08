@@ -135,7 +135,7 @@ function OnLoad()
         menu.comboset:addParam("gapClose", "Auto W Gapclosers", SCRIPT_PARAM_ONOFF, true)
 
     menu:addSubMenu("Jungle Farm Settings", "jungle")
-        menu.jungle:addParam("active",  "Farm jungle",             SCRIPT_PARAM_ONKEYDOWN, false, string.byte("X"))
+        menu.jungle:addParam("active",  "Farm jungle",             SCRIPT_PARAM_ONKEYDOWN, false, string.byte("V"))
         menu.jungle:addParam("orbwalk", "Orbwalk while farming",   SCRIPT_PARAM_ONOFF,     true)
         menu.jungle:addParam("smart",   "Smart combo (Smite + Q)", SCRIPT_PARAM_ONOFF,     true)
         menu.jungle:addParam("draw",    "Draw jungle stuff",       SCRIPT_PARAM_ONOFF,     true)
