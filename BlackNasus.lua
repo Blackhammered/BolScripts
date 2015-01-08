@@ -1,6 +1,6 @@
 if myHero.charName ~= "Nasus" then return end
 
-local version = 1.04
+local version = 1.05
 local AUTOUPDATE = true
 
 require "SOW"
@@ -96,7 +96,7 @@ local lastAttack     = 0
 local lastWindUpTime = 0
 local lastAttackCD   = 0
 
-local debug = {}
+local debug = nil
 
 ---------------------------------------
 --Constants--
