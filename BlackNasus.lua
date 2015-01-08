@@ -1,6 +1,6 @@
 if myHero.charName ~= "Nasus" then return end
 
-local version = 1.00
+local version = 1.01
 local AUTOUPDATE = true
 
 require "SOW"
