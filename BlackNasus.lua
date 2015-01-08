@@ -173,7 +173,8 @@ end
 
 function OnTick()
 
-  if menu.disabled then timeForPerfectQ()
+  if menu.disabled then timeForPerfectQ() end
+  if menu.disabledT then timeForPerfectQ() end
     -- Update debug menu
     menu.debug.lastdmg     = debug["LastDamage"]
     if jungleLib then menu.debug.jungleCount = jungleLib:MobCount(true, TRUE_RANGE * 2) end
@@ -306,6 +307,7 @@ end
  ]]
 
 function timeForPerfectQ()
+  moveToMouse()
 
     -- Lane minions
     for _, minion in pairs(enemyMinions.objects) do
@@ -332,7 +334,7 @@ function timeForPerfectQ()
             end
         end
     end
-
+  end
 end
 
 
