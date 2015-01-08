@@ -173,6 +173,7 @@ end
 
 function OnTick()
 
+  if menu.disabled then timeForPerfectQ()
     -- Update debug menu
     menu.debug.lastdmg     = debug["LastDamage"]
     if jungleLib then menu.debug.jungleCount = jungleLib:MobCount(true, TRUE_RANGE * 2) end
@@ -225,9 +226,6 @@ function OnTick()
     -- Prechecks
     if menu.disabled then return end
     if menu.disabledT then return end
-
-    -- Hit em, but hit em hard!
-    timeForPerfectQ()
 
     -- Prechecks for jungling
     if not menu.jungle.active then return end
