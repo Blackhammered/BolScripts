@@ -1,6 +1,6 @@
 if myHero.charName ~= "Nasus" then return end
 
-local version = 1.08
+local version = 1.85
 local AUTOUPDATE = true
 
 require "SOW"
@@ -96,7 +96,7 @@ local lastAttack     = 0
 local lastWindUpTime = 0
 local lastAttackCD   = 0
 
-local debug = nil
+local debug = {}
 
 ---------------------------------------
 --Constants--
@@ -173,6 +173,12 @@ end
 function OnTick()
 
     -- Update debug config
+
+        menu.debug.lastdmg     = debug["LastDamage"]
+    if jungleLib then config.debug.jungleCount = jungleLib:MobCount(true, TRUE_RANGE * 2) end
+    config.debug.attackSpeed = attackSpeed
+    config.debug.hitsWhileCD = debug["HitsWhileCooldown"]
+    config.debug.cooldownQ   = debug["CooldownQ"]
     -- Update minion managers
     enemyMinions:update()
     ts:update()
