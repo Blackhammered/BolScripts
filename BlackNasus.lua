@@ -30,7 +30,6 @@ RequireI:Add("JungleLib", "https://bitbucket.org/Hellsing/botoflegends/raw/maste
 RequireI:Check()
 
 if RequireI.downloadNeeded == true then return end
-----------------------------------------------------
 
 DashList = {
         ['Ahri']        = {true, spell = 'AhriTumble'},
@@ -41,7 +40,7 @@ DashList = {
         ['Diana']       = {true, spell = 'DianaTeleport'}, -- Targeted ability
         ['Elise']       = {true, spell = 'EliseSpiderQCast'}, -- Targeted ability
         ['Fiora']       = {true, spell = 'FioraQ'}, -- Targeted ability
-        ['Fizz']      	= {true, spell = 'FizzPiercingStrike'}, -- Targeted ability
+        ['Fizz']        = {true, spell = 'FizzPiercingStrike'}, -- Targeted ability
         ['Gragas']      = {true, spell = 'GragasE'},
         ['Graves']      = {true, spell = 'GravesMove'},
         ['Hecarim']     = {true, spell = 'HecarimUlt'},
@@ -57,7 +56,7 @@ DashList = {
         ['Lucian']      = {true, spell = 'LucianE'},
         ['Malphite']    = {true, spell = 'UFSlash'},
         ['Maokai']      = {true, spell = 'MaokaiTrunkLine',}, -- Targeted ability 
-    	['MasterYi']    = {true, spell = 'AlphaStrike',}, -- Targeted
+        ['MasterYi']    = {true, spell = 'AlphaStrike',}, -- Targeted
         ['MonkeyKing']  = {true, spell = 'MonkeyKingNimbus'}, -- Targeted ability
         ['Nidalee']     = {true, spell = 'Pounce'},
         ['Pantheon']    = {true, spell = 'PantheonW'}, -- Targeted ability
@@ -66,25 +65,24 @@ DashList = {
         ['Poppy']       = {true, spell = 'PoppyHeroicCharge'}, -- Targeted ability
         ['Rammus']      = {true, spell = 'PowerBall'},
         ['Renekton']    = {true, spell = 'RenektonSliceAndDice'},
-        ['Riven']     	= {true, spell = 'RivenFeint'},
+        ['Riven']       = {true, spell = 'RivenFeint'},
         ['Sejuani']     = {true, spell = 'SejuaniArcticAssault'},
         ['Shyvana']     = {true, spell = 'ShyvanaTransformCast'},
         ['Shen']        = {true, spell = 'ShenShadowDash'},
         ['Talon']       = {true, spell = 'TalonCutthroat'},
         ['Tristana']    = {true, spell = 'RocketJump'},
         ['Tryndamere']  = {true, spell = 'Slash'},
-        ['Vi']     		= {true, spell = 'ViQ'},
+        ['Vi']          = {true, spell = 'ViQ'},
         ['XinZhao']     = {true, spell = 'XenZhaoSweep'}, -- Targeted ability
         ['Yasuo']       = {true, spell = 'YasuoDashWrapper'} -- Targeted ability
 }
----------------------------------------
---Globals--
----------------------------------------
+
+------------ Globals ------------
 
 local enemyMinions = nil
 local jungleMobs   = nil
 local jungleLib    = nil
-local config         = nil
+local menu         = nil
 
 local buffActive = false
 local buffStacks = 0
@@ -98,71 +96,89 @@ local lastAttackCD   = 0
 
 local debug = {}
 
----------------------------------------
---Constants--
----------------------------------------
+----------- Constants -----------
+
 local TRUE_RANGE = 125 + player:GetDistance(player.minBBox)
-local BUFF_NAME = "NasusQ"
-local DAMAGE_Q = { 30, 50, 70, 90, 110 }
-local BASE_ATTACKSPEED = 0.638
+local BUFF_NAME  = "NasusQ"
+local DAMAGE_Q   = { 30, 50, 70, 90, 110 }
+
+local BASE_ATTACKSPEED       = 0.638
+
 local ITEMS = { [3057] = { name = "Sheen",            unique = "SPELLBLADE", buffName = "sheen",          buffActive = false, bonusDamage = 0, multiplier = 1 },
                 [3025] = { name = "Iceborn Gauntlet", unique = "SPELLBLADE", buffName = "itemfrozenfist", buffActive = false, bonusDamage = 0, multiplier = 1.25} }
 
----------------------------------------
---Script--
----------------------------------------
-
 function OnLoad()
 
-	VP = VPrediction()
-	iSOW = SOW(VP)
-	jungleLib = JungleLib()
+  VP    = VPrediction()
+  iSOW  = SOW(VP)
+  jungleLib = JungleLib()
 
-		ts = TargetSelector(TARGET_LOW_HP, 600)
-		ts.name = "Nasus"
+    ts = TargetSelector(TARGET_LOW_HP, 600)
+    ts.name = "Nasus"
+    
+    enemyMinions = minionManager(MINION_ENEMY, 1000, myHero, MINION_SORT_MAXHEALTH_DEC)
 
-		enemyMinions = minionManager(MINION_ENEMY, 1000, myHero, MINION_SORT_MAXHEALTH_DEC)
+    menu = scriptConfig("tNasus", "tNasus")
 
-		config = scriptConfig("BlackNasus", "BlackNasus")
+    menu:addSubMenu("tNasus: Orbwalk", "Orbwalk")
+      iSOW:LoadToMenu(menu.Orbwalk)
+            
+    menu:addSubMenu("tNasus: Masteries", "masteries")
+        menu.masteries:addParam("butcher", "Butcher",      SCRIPT_PARAM_SLICE, 0, 0, 1, 0)
+        menu.masteries:addParam("arcane",  "Arcane Blade", SCRIPT_PARAM_SLICE, 0, 0, 1, 0)
+        menu.masteries:addParam("havoc",   "Havoc",        SCRIPT_PARAM_SLICE, 0, 0, 1, 0)
+        
+    menu:addSubMenu("tNasus: Combo settins", "comboset")
+        menu.comboset:addParam("autoR", "Auto Ult", SCRIPT_PARAM_ONOFF, true)
+        menu.comboset:addParam("minR", "Auto Ult when X enemies in range", SCRIPT_PARAM_SLICE, 1, 0, 5, 0)
+        menu.comboset:addParam("ks", "KS with Q and E", SCRIPT_PARAM_ONOFF, true)
+        menu.comboset:addParam("gapClose", "Auto W Gapclosers", SCRIPT_PARAM_ONOFF, true)
 
-		
+    menu:addSubMenu("tNasus: Jungle Farm Settings", "jungle")
+        menu.jungle:addParam("active",  "Farm jungle",             SCRIPT_PARAM_ONKEYDOWN, false, string.byte("N"))
+        menu.jungle:addParam("orbwalk", "Orbwalk while farming",   SCRIPT_PARAM_ONOFF,     true)
+        menu.jungle:addParam("sep",     "",                        SCRIPT_PARAM_INFO,      "")
+        menu.jungle:addParam("smart",   "Smart combo (Smite + Q)", SCRIPT_PARAM_ONOFF,     true)
+        menu.jungle:addParam("sep",     "",                        SCRIPT_PARAM_INFO,      "")
+        menu.jungle:addParam("draw",    "Draw jungle stuff",       SCRIPT_PARAM_ONOFF,     true)
 
-		config:addSubMenu("Orbwalk Settings", "Orbwalk")
-			iSOW:LoadToconfig(config.Orbwalk)
+    menu:addSubMenu("Debug Information", "debug")
+        menu.debug:addParam("lastdmg",     "Last Q damage calculated: ",  SCRIPT_PARAM_INFO, 0);
+        menu.debug:addParam("sep",         "",                            SCRIPT_PARAM_INFO, "");
+        menu.debug:addParam("jungleCount", "Jungle minions around you: ", SCRIPT_PARAM_INFO, 0)
+        menu.debug:addParam("sep",         "",                            SCRIPT_PARAM_INFO, "");
+        menu.debug:addParam("attackSpeed", "Attack Speed: ",              SCRIPT_PARAM_INFO, 0);
+        menu.debug:addParam("cooldownQ",   "Cooldown for Q: ",            SCRIPT_PARAM_INFO, 0)
+        menu.debug:addParam("hitsWhileCD", "AA hits while Q cooldown: ",  SCRIPT_PARAM_INFO, 0);
 
-		config:addSubMenu("Draw Settings", "drawsettings")
-			config.drawsettings:addParam("qrange", "Draw Q Range", SCRIPT_PARAM_ONOFF, false)
-			config.drawsettings:addParam("wrange", "Draw W Range", SCRIPT_PARAM_ONOFF, false)
-			config.drawsettings:addParam("erange", "Draw E Range", SCRIPT_PARAM_ONOFF, false)
-			config.drawsettings:addParam("rrange", "Draw R Range", SCRIPT_PARAM_ONOFF, false)
-		config:addSubMenu("Jungle Settings", "jungle")
-        	config.jungle:addParam("active", "Farm jungle", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("V"))
-        	config.jungle:addParam("orbwalk", "Orbwalk while farming", SCRIPT_PARAM_ONOFF, true)
-        	config.jungle:addParam("sep", "", SCRIPT_PARAM_INFO, "")
-        	config.jungle:addParam("smart", "Smart combo (Smite + Q)", SCRIPT_PARAM_ONOFF, true)
-        	config.jungle:addParam("sep", "", SCRIPT_PARAM_INFO, "")
-		config:addSubMenu("Mastery Settings", "masteries")
-			config.masteries:addParam("butcher", "Butcher", SCRIPT_PARAM_SLICE, 0, 0, 1, 0)
-        	config.masteries:addParam("arcane", "Arcane Blade", SCRIPT_PARAM_SLICE, 0, 0, 1, 0)
-        	config.masteries:addParam("havoc", "Havoc", SCRIPT_PARAM_SLICE, 0, 0, 1, 0)
-		config:addSubMenu("Combo Settings", "comboset")
-			config.comboset:addParam("autoR", "Auto Ult", SCRIPT_PARAM_ONOFF, false)
-			config.comboset:addParam("minR", "Auto Ult when x # of enemies in range", SCRIPT_PARAM_SLICE, 1, 0, 5, 0)
-        	config.comboset:addParam("ks", "KS with Q and E", SCRIPT_PARAM_ONOFF, false)
-        	config.comboset:addParam("gapClose", "Auto W Gapclosers", SCRIPT_PARAM_ONOFF, false)
+    menu:addParam("sep",         "",                                 SCRIPT_PARAM_INFO,        "")
+    menu:addParam("sep",         "",                                 SCRIPT_PARAM_INFO,        "")
+    menu:addParam("disabled",    "Disable Stacking               ", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("T"))
+    menu:addParam("disabledT",   "Disable Stacking (Toggle)               ", SCRIPT_PARAM_ONKEYTOGGLE, false, string.byte("Y"))
+    menu:addParam("sep",         "",                                 SCRIPT_PARAM_INFO,        "")
+    menu:addParam("drawRange",   "Draw auto-attack range",           SCRIPT_PARAM_ONOFF,       true)
+    menu:addParam("drawIndic",   "Draw damage indicator on enemies", SCRIPT_PARAM_ONOFF,       true)
+    menu:addParam("markMinions", "Mark killable minions",            SCRIPT_PARAM_ONOFF,       true)
+    menu:addParam("sep",         "",                                 SCRIPT_PARAM_INFO,        "")
+    menu:addParam("version",     "Installed Version:",               SCRIPT_PARAM_INFO,        version)
+    menu:addParam("combo", "Combo", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("T"))
+    menu:addParam("escape", "Escape", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("S"))
+    
+    print("<font color=\"#0DF8FF\">tNasus Loaded Successfully</font> ")
 
-
-        config:addParam("enabled", "Enable Q Stacking", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("V"))
-		config:addParam("enabledT", "Q Stacking Toggle", SCRIPT_PARAM_ONKEYTOGGLE, false, string.byte("Y"))
-		config:addParam("escape", "Escape", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("C"))
-		config:addParam("combo", "Combo", SCRIPT_PARAM_ONKEYDOWN, false, 32)
-		config:addParam("version", "Installed Version: ", SCRIPT_PARAM_INFO, version)
-
-        print("<font color=\"#0DF8FF\">BlackNasus Loaded Successfully</font> ")
+    --UpdateWeb(true, ScriptName, id, HWID)
+    
 
 end
 
 function OnTick()
+
+    -- Update debug menu
+    menu.debug.lastdmg     = debug["LastDamage"]
+    if jungleLib then menu.debug.jungleCount = jungleLib:MobCount(true, TRUE_RANGE * 2) end
+    menu.debug.attackSpeed = attackSpeed
+    menu.debug.hitsWhileCD = debug["HitsWhileCooldown"]
+    menu.debug.cooldownQ   = debug["CooldownQ"]
 
     -- Update minion managers
     enemyMinions:update()
@@ -183,16 +199,16 @@ function OnTick()
         end
     end
     
-  ---Combo---
-  if config.combo then
+  -- Combo shit
+  if menu.combo then
     combo()
   end
   
-  if config.escape then escape() end
+  if menu.escape then escape() end
   
-  if Rready and config.comboset.autoR then autoult() end
+  if Rready and menu.comboset.autoR then autoult() end
   
-  if config.comboset.ks then ks() end
+  if menu.comboset.ks then ks() end
     
   
   Qready = (myHero:CanUseSpell(_Q) == READY)
@@ -207,14 +223,17 @@ function OnTick()
     attackSpeed = player.attackSpeed * BASE_ATTACKSPEED
 
     -- Prechecks
-    if config.enabled then return end
-    if config.enabled then return end
+    if menu.disabled then return end
+    if menu.disabledT then return end
 
+    -- Hit em, but hit em hard!
     timeForPerfectQ()
 
-    if not config.jungle.active then return end
+    -- Prechecks for jungling
+    if not menu.jungle.active then return end
 
-    clearJungle()
+    -- Alright, let's doooh eeeht!
+    clearDemJungle()
 
 end
 
@@ -241,7 +260,7 @@ function autoult()
 
   EnemiesInR = AreaEnemyCount(myHero, 400)
 
-  if Rready and EnemiesInR >= config.combo.minR and myHero.health < (myHero.maxHealth * (60 / 100)) then
+  if Rready and EnemiesInR >= menu.comboset.minR and myHero.health < (myHero.maxHealth * (60 / 100)) then
     CastSpell(_R)
   end
 end
@@ -272,18 +291,21 @@ function ks()
     if GetDistance(enemy) < 650 then
       local qDmg = getDmg("Q", enemy, myHero)
       local eDmg = getDmg("E", enemy, myHero)
-      if enemy and not enemy.dead and GetDistanceSqr(enemy) <= TRUE_RANGE^2 and enemy.health <= qDmg and config.combo.ks then
+      if enemy and not enemy.dead and GetDistanceSqr(enemy) <= TRUE_RANGE^2 and enemy.health <= qDmg and menu.comboset.ks then
           CastSpell(_Q)
           packetAttack(enemy)
       end
-      if enemy ~= nil and not enemy.dead and GetDistance(enemy) < 650 and enemy.health <= eDmg and config.combo.ks then
+      if enemy ~= nil and not enemy.dead and GetDistance(enemy) < 650 and enemy.health <= eDmg and menu.comboset.ks then
         CastSpell(_E, enemy.x, enemy.z)
       end
     end
   end
 end
-
----Perfect Q---
+--[[
+        _______ __   _ _______      _______ _______  ______ _______ _____ __   _  ______
+ |      |_____| | \  | |______      |______ |_____| |_____/ |  |  |   |   | \  | |  ____
+ |_____ |     | |  \_| |______      |       |     | |    \_ |  |  | __|__ |  \_| |_____|
+ ]]
 
 function timeForPerfectQ()
 
@@ -300,13 +322,13 @@ function timeForPerfectQ()
                 if not buffActive and player:CanUseSpell(_Q) == READY then
                     packetCast(_Q)
                     packetAttack(minion)
-                    debug["lastdmg"] = damage
+                    debug["LastDamage"] = damage
                     break
                 end
 
                 if buffActive then
                     packetAttack(minion)
-                    debug["lastdmg"] = damage
+                    debug["LastDamage"] = damage
                     break
                 end
             end
@@ -315,9 +337,14 @@ function timeForPerfectQ()
 
 end
 
----Jungle---
 
-function clearJungle()
+--[[
+ _____ _     _ __   _  ______        _______      _______ _______ _     _ _______ _______
+   |   |     | | \  | |  ____ |      |______      |______    |    |     | |______ |______
+ __|   |_____| |  \_| |_____| |_____ |______      ______|    |    |_____| |       |      
+ ]]
+
+function clearDemJungle()
 
     local cooldownQ         = player:GetSpellData(_Q).totalCooldown
     debug["CooldownQ"]      = cooldownQ
@@ -332,16 +359,16 @@ function clearJungle()
 
         local damageWhileCooldown = hitsWhileCooldown * damageAA
 
-        if config.jungle.orbwalk and ValidTarget(mob, TRUE_RANGE) or not config.jungle.orbwalk and ValidTarget(mob, TRUE_RANGE * 2) then
+        if menu.jungle.orbwalk and ValidTarget(mob, TRUE_RANGE) or not menu.jungle.orbwalk and ValidTarget(mob, TRUE_RANGE * 2) then
             if (damageQ >= mob.health or mob.health > damageWhileCooldown + damageQ) and (player:CanUseSpell(_Q) == READY or buffActive) then
                 if not buffActive then packetCast(_Q) end
                 packetAttack(mob)
-                debug["lastdmg"] = damageQ
+                debug["LastDamage"] = damageQ
                 return
             elseif GetTickCount() + GetLatency() / 2 > lastAttack + lastAttackCD then
                 if mob.health > damageAA then
                     packetAttack(mob)
-                    debug["lastdmg"] = damageQ
+                    debug["LastDamage"] = damageQ
                     return
                 end
             else
@@ -352,11 +379,18 @@ function clearJungle()
     end
 
     -- Jungle orbwalker
-    if config.jungle.orbwalk and GetTickCount() + GetLatency() / 2 > lastAttack + lastWindUpTime + 20 then
+    if menu.jungle.orbwalk and GetTickCount() + GetLatency() / 2 > lastAttack + lastWindUpTime + 20 then
         moveToMouse()
     end
 
 end
+
+
+--[[
+  ______ _______ __   _ _______  ______ _______             _______ _______               ______  _______ _______ _     _ _______
+ |  ____ |______ | \  | |______ |_____/ |_____| |           |       |_____| |      |      |_____] |_____| |       |____/  |______
+ |_____| |______ |  \_| |______ |    \_ |     | |_____      |_____  |     | |_____ |_____ |_____] |     | |_____  |    \_ ______|
+]]
 
 function OnProcessSpell(unit, spell)
 
@@ -368,7 +402,7 @@ function OnProcessSpell(unit, spell)
         lastWindUpTime = spell.windUpTime * 1000
         lastAttackCD = spell.animationTime * 1000
     end
-    if config.combo.gapClose and Wready then
+    if menu.comboset.gapClose and Wready then
       if unit.team ~= myHero.team then
         local spellName = spell.name
         if DashList[unit.charName] and spellName == DashList[unit.charName].spell and GetDistance(unit) < 2000 then
@@ -442,13 +476,103 @@ function OnLoseBuff(unit, buff)
 
 end
 
----Others---
+
+--[[
+ ______   ______ _______ _  _  _ _____ __   _  ______ _______
+ |     \ |_____/ |_____| |  |  |   |   | \  | |  ____ |______
+ |_____/ |    \_ |     | |__|__| __|__ |  \_| |_____| ______|
+]]
+
+function OnDraw()
+
+    -- Draw our range
+    if menu.drawRange then DrawCircle3D(player.x, player.y, player.z, TRUE_RANGE, 1, ARGB(255, 255, 50,  0), 10) end
+
+    -- Draw minions which are ready to get killed
+    if menu.markMinions then
+        for _, minion in pairs(enemyMinions.objects) do
+
+            if calculateDamage(minion, buffDamage) >= minion.health then
+                DrawCircle3D(minion.x, minion.y, minion.z, Vector(minion.x, minion.y, minion.z):dist(Vector(minion.minBBox.x, minion.minBBox.y, minion.minBBox.z)), 1, ARGB(255, 255, 50,  0), 10)
+            end
+
+        end
+    end
+
+    -- Draw damage indicators
+    if menu.drawIndic then
+        for _, enemy in ipairs(GetEnemyHeroes()) do
+            if (ValidTarget(enemy)) then
+                DrawIndicator(enemy, enemy.health - math.floor(calculateDamage(enemy, buffDamage)))
+            end
+        end
+    end
+
+    -- Draw jungle stuff
+    if menu.jungle.draw and jungleLib then
+        local priorityMob = jungleLib:GetJungleMobs(true, TRUE_RANGE * 2)[1]
+
+        if priorityMob then DrawCircle3D(priorityMob.x, priorityMob.y, priorityMob.z, Vector(priorityMob.x, priorityMob.y, priorityMob.z):dist(Vector(priorityMob.minBBox.x, priorityMob.minBBox.y, priorityMob.minBBox.z)), 1, ARGB(255, 255, 50,  0), 10) end
+    end
+
+end
+
+-- Credits to Zikkah for this, just added validations
+function GetHPBarPos(enemy)
+
+    enemy.barData = GetEnemyBarData()
+    local barPos = GetUnitHPBarPos(enemy)
+    local barPosOffset = GetUnitHPBarOffset(enemy)
+
+    -- Validation
+    if enemy.barData == nil or barPos == nil or barPosOffset == nil then return end
+
+    local barOffset = { x = enemy.barData.PercentageOffset.x, y = enemy.barData.PercentageOffset.y }
+    local barPosPercentageOffset = { x = enemy.barData.PercentageOffset.x, y = enemy.barData.PercentageOffset.y }
+    local BarPosOffsetX = 171
+    local BarPosOffsetY = 46
+    local CorrectionY =  0
+    local StartHpPos = 31
+    barPos.x = barPos.x + (barPosOffset.x - 0.5 + barPosPercentageOffset.x) * BarPosOffsetX + StartHpPos
+    barPos.y = barPos.y + (barPosOffset.y - 0.5 + barPosPercentageOffset.y) * BarPosOffsetY + CorrectionY 
+                        
+    local StartPos = Vector(barPos.x , barPos.y, 0)
+    local EndPos =  Vector(barPos.x + 108 , barPos.y , 0)
+
+    return Vector(StartPos.x, StartPos.y, 0), Vector(EndPos.x, EndPos.y, 0)
+
+end
+
+-- Credits to honda7 for this, just added validations and different colors
+function DrawIndicator(unit, health)
+
+    local SPos, EPos = GetHPBarPos(unit)
+
+    -- Validation
+    if SPos == nil or EPos == nil then return end
+
+    local barlenght = EPos.x - SPos.x
+    local Position = SPos.x + (health / unit.maxHealth) * barlenght
+    if Position < SPos.x then
+        Position = SPos.x
+    end
+    DrawText("|", 13, Position, SPos.y+10, (health > 0 and ARGB(255, 0, 255, 0) or ARGB(255, 255, 0, 0)))
+
+end
+
+
+--[[
+  _____  _______ _     _ _______  ______      _______ _______ _     _ _______ _______
+ |     |    |    |_____| |______ |_____/      |______    |    |     | |______ |______
+ |_____|    |    |     | |______ |    \_      ______|    |    |_____| |       |      
+
+]]
 
 function calculateDamage(target, bonusDamage)
     -- read initial armor and damage values
     local armorPenPercent = player.armorPenPercent
     local armorPen = player.armorPen
-    local totalDamage = (player.totalDamage + (bonusDamage or 0) + (config.masteries.butcher == 1 and 2 or 0)) * (config.masteries.havoc == 1 and 1.03 or 1)
+    local totalDamage = (player.totalDamage + (bonusDamage or 0) + (menu.masteries.butcher == 1 and 2 or 0)) * (menu.masteries.havoc == 1 and 1.03 or 1)
     local damageMultiplier = 1
 
     -- turrets ignore armor penetration and critical attacks
@@ -470,7 +594,7 @@ function calculateDamage(target, bonusDamage)
     end
 
     -- calculate damage dealt including masteries
-    return damageMultiplier * totalDamage + (config.masteries.arcane == 1 and (player:CalcMagicDamage(target, 0.05 * player.ap)) or 0) 
+    return damageMultiplier * totalDamage + (menu.masteries.arcane == 1 and (player:CalcMagicDamage(target, 0.05 * player.ap)) or 0) 
 end
 
 function isInside(target, distance, source)
@@ -521,17 +645,3 @@ function UnitAtTower(unit,offset)
   end
   return false
 end
-
-
-
-
-		
-
-
-
-
-
-
-
-
-
