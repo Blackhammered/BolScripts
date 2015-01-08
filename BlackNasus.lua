@@ -1,6 +1,6 @@
 if myHero.charName ~= "Nasus" then return end
 
-local version = 1.85
+local version = 1.01
 local AUTOUPDATE = true
 
 require "SOW"
@@ -118,53 +118,45 @@ function OnLoad()
     
     enemyMinions = minionManager(MINION_ENEMY, 1000, myHero, MINION_SORT_MAXHEALTH_DEC)
 
-    menu = scriptConfig("tNasus", "tNasus")
+    menu = scriptConfig("BlackNasus", "BlackNasus")
 
-    menu:addSubMenu("tNasus: Orbwalk", "Orbwalk")
+    menu:addSubMenu("Orbwalk", "Orbwalk")
       iSOW:LoadToMenu(menu.Orbwalk)
             
-    menu:addSubMenu("tNasus: Masteries", "masteries")
+    menu:addSubMenu("Masteries", "masteries")
         menu.masteries:addParam("butcher", "Butcher",      SCRIPT_PARAM_SLICE, 0, 0, 1, 0)
         menu.masteries:addParam("arcane",  "Arcane Blade", SCRIPT_PARAM_SLICE, 0, 0, 1, 0)
         menu.masteries:addParam("havoc",   "Havoc",        SCRIPT_PARAM_SLICE, 0, 0, 1, 0)
         
-    menu:addSubMenu("tNasus: Combo settins", "comboset")
+    menu:addSubMenu("Combo settins", "comboset")
         menu.comboset:addParam("autoR", "Auto Ult", SCRIPT_PARAM_ONOFF, true)
         menu.comboset:addParam("minR", "Auto Ult when X enemies in range", SCRIPT_PARAM_SLICE, 1, 0, 5, 0)
         menu.comboset:addParam("ks", "KS with Q and E", SCRIPT_PARAM_ONOFF, true)
         menu.comboset:addParam("gapClose", "Auto W Gapclosers", SCRIPT_PARAM_ONOFF, true)
 
-    menu:addSubMenu("tNasus: Jungle Farm Settings", "jungle")
+    menu:addSubMenu("Jungle Farm Settings", "jungle")
         menu.jungle:addParam("active",  "Farm jungle",             SCRIPT_PARAM_ONKEYDOWN, false, string.byte("N"))
         menu.jungle:addParam("orbwalk", "Orbwalk while farming",   SCRIPT_PARAM_ONOFF,     true)
-        menu.jungle:addParam("sep",     "",                        SCRIPT_PARAM_INFO,      "")
         menu.jungle:addParam("smart",   "Smart combo (Smite + Q)", SCRIPT_PARAM_ONOFF,     true)
-        menu.jungle:addParam("sep",     "",                        SCRIPT_PARAM_INFO,      "")
         menu.jungle:addParam("draw",    "Draw jungle stuff",       SCRIPT_PARAM_ONOFF,     true)
 
     menu:addSubMenu("Debug Information", "debug")
         menu.debug:addParam("lastdmg",     "Last Q damage calculated: ",  SCRIPT_PARAM_INFO, 0);
-        menu.debug:addParam("sep",         "",                            SCRIPT_PARAM_INFO, "");
         menu.debug:addParam("jungleCount", "Jungle minions around you: ", SCRIPT_PARAM_INFO, 0)
-        menu.debug:addParam("sep",         "",                            SCRIPT_PARAM_INFO, "");
         menu.debug:addParam("attackSpeed", "Attack Speed: ",              SCRIPT_PARAM_INFO, 0);
         menu.debug:addParam("cooldownQ",   "Cooldown for Q: ",            SCRIPT_PARAM_INFO, 0)
         menu.debug:addParam("hitsWhileCD", "AA hits while Q cooldown: ",  SCRIPT_PARAM_INFO, 0);
 
-    menu:addParam("sep",         "",                                 SCRIPT_PARAM_INFO,        "")
-    menu:addParam("sep",         "",                                 SCRIPT_PARAM_INFO,        "")
     menu:addParam("disabled",    "Disable Stacking               ", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("T"))
     menu:addParam("disabledT",   "Disable Stacking (Toggle)               ", SCRIPT_PARAM_ONKEYTOGGLE, false, string.byte("Y"))
-    menu:addParam("sep",         "",                                 SCRIPT_PARAM_INFO,        "")
     menu:addParam("drawRange",   "Draw auto-attack range",           SCRIPT_PARAM_ONOFF,       true)
     menu:addParam("drawIndic",   "Draw damage indicator on enemies", SCRIPT_PARAM_ONOFF,       true)
     menu:addParam("markMinions", "Mark killable minions",            SCRIPT_PARAM_ONOFF,       true)
-    menu:addParam("sep",         "",                                 SCRIPT_PARAM_INFO,        "")
     menu:addParam("version",     "Installed Version:",               SCRIPT_PARAM_INFO,        version)
     menu:addParam("combo", "Combo", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("T"))
     menu:addParam("escape", "Escape", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("S"))
     
-    print("<font color=\"#0DF8FF\">tNasus Loaded Successfully</font> ")
+    print("<font color=\"#0DF8FF\">BlackNasus Loaded Successfully</font> ")
 
     --UpdateWeb(true, ScriptName, id, HWID)
     
@@ -307,7 +299,6 @@ end
  ]]
 
 function timeForPerfectQ()
-  moveToMouse()
 
     -- Lane minions
     for _, minion in pairs(enemyMinions.objects) do
