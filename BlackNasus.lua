@@ -1,6 +1,6 @@
 if myHero.charName ~= "Nasus" then return end
 
-local version = 1.07
+local version = 1.08
 local AUTOUPDATE = true
 
 require "SOW"
@@ -451,6 +451,85 @@ function OnLoseBuff(unit, buff)
 
 end
 
+---Others---
+
+function calculateDamage(target, bonusDamage)
+    -- read initial armor and damage values
+    local armorPenPercent = player.armorPenPercent
+    local armorPen = player.armorPen
+    local totalDamage = (player.totalDamage + (bonusDamage or 0) + (menu.masteries.butcher == 1 and 2 or 0)) * (menu.masteries.havoc == 1 and 1.03 or 1)
+    local damageMultiplier = 1
+
+    -- turrets ignore armor penetration and critical attacks
+    if target.type == "obj_AI_Turret" then
+        armorPenPercent = 1
+        armorPen = 0
+    end
+
+    -- calculate initial damage multiplier for negative and positive armor
+    local targetArmor = (target.armor * armorPenPercent) - armorPen
+    if targetArmor >= 0 then 
+        damageMultiplier = 100 / (100 + targetArmor) * damageMultiplier
+    end
+
+    -- use ability power or ad based damage on turrets
+    if target.type == "obj_AI_Turret" then
+        damageMultiplier = 0.95 * damageMultiplier
+        totalDamage = math.max(player.totalDamage, player.damage + 0.4 * player.ap)
+    end
+
+    -- calculate damage dealt including masteries
+    return damageMultiplier * totalDamage + (menu.masteries.arcane == 1 and (player:CalcMagicDamage(target, 0.05 * player.ap)) or 0) 
+end
+
+function isInside(target, distance, source)
+
+    source = source or player
+    return GetdistanceSqr(target, source) <= distance ^ 2
+
+end
+
+function moveToMouse()
+    if not _G.evade then
+        local moveToPos = player + (Vector(mousePos) - player):normalized() * 300
+        Packet('S_MOVE', {type = 2, x = moveToPos.x, y = moveToPos.z}):send()
+    end
+end
+
+function packetCast(id, param1, param2)
+    if param1 ~= nil and param2 ~= nil then
+    Packet("S_CAST", {spellId = id, toX = param1, toY = param2, fromX = param1, fromY = param2}):send()
+    elseif param1 ~= nil then
+    Packet("S_CAST", {spellId = id, toX = param1.x, toY = param1.z, fromX = param1.x, fromY = param1.z, targetNetworkId = param1.networkID}):send()
+    else
+    Packet("S_CAST", {spellId = id, toX = player.x, toY = player.z, fromX = player.x, fromY = player.z, targetNetworkId = player.networkID}):send()
+    end
+end
+
+function packetAttack(enemy)
+    Packet('S_MOVE', {type = 3, targetNetworkId=enemy.networkID}):send()
+end
+
+function OnBugsplat()
+  --UpdateWeb(false, ScriptName, id, HWID)
+end
+
+function OnUnload()
+  --UpdateWeb(false, ScriptName, id, HWID)
+end
+
+function UnitAtTower(unit,offset)
+  for i, turret in pairs(GetTurrets()) do
+    if turret ~= nil then
+      if turret.team ~= myHero.team then
+        if GetDistance(unit, turret) <= turret.range+offset then
+          return true
+        end
+      end
+    end
+  end
+  return false
+end
 
 
 
