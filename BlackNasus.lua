@@ -325,7 +325,7 @@ function timeForPerfectQ()
             end
         end
     end
-  end
+    
 end
 
 
