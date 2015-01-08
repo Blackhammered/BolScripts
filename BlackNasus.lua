@@ -150,14 +150,6 @@ function OnLoad()
 			config.comboset:addParam("minR", "Auto Ult when x # of enemies in range", SCRIPT_PARAM_SLICE, 1, 0, 5, 0)
         	config.comboset:addParam("ks", "KS with Q and E", SCRIPT_PARAM_ONOFF, false)
         	config.comboset:addParam("gapClose", "Auto W Gapclosers", SCRIPT_PARAM_ONOFF, false)
-        config:addSubMenu("Debug Info", "debug")
-        	config.debug:addParam("lastdmg",     "Last Q damage calculated: ", SCRIPT_PARAM_INFO, 0);
-        	config.debug:addParam("sep", "", SCRIPT_PARAM_INFO, "");
-        	config.debug:addParam("jungleCount", "Jungle minions around you: ", SCRIPT_PARAM_INFO, 0)
-        	config.debug:addParam("sep", "", SCRIPT_PARAM_INFO, "");
-        	config.debug:addParam("attackSpeed", "Attack Speed: ", SCRIPT_PARAM_INFO, 0);
-        	config.debug:addParam("cooldownQ", "Cooldown for Q: ", SCRIPT_PARAM_INFO, 0)
-        	config.debug:addParam("hitsWhileCD", "AA hits while Q cooldown: ", SCRIPT_PARAM_INFO, 0);
 
 
         config:addParam("enabled", "Enable Q Stacking", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("V"))
@@ -172,13 +164,6 @@ end
 
 function OnTick()
 
-    -- Update debug config
-
-    config.debug.lastdmg = debug["lastdmg"]
-    if jungleLib then config.debug.jungleCount = jungleLib:MobCount(true, TRUE_RANGE * 2) end
-    config.debug.attackSpeed = attackSpeed
-    config.debug.hitsWhileCD = debug["HitsWhileCooldown"]
-    config.debug.cooldownQ   = debug["CooldownQ"]
     -- Update minion managers
     enemyMinions:update()
     ts:update()
