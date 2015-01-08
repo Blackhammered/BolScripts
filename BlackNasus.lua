@@ -135,7 +135,7 @@ function OnLoad()
         menu.comboset:addParam("gapClose", "Auto W Gapclosers", SCRIPT_PARAM_ONOFF, true)
 
     menu:addSubMenu("Jungle Farm Settings", "jungle")
-        menu.jungle:addParam("active",  "Farm jungle",             SCRIPT_PARAM_ONKEYDOWN, false, string.byte("N"))
+        menu.jungle:addParam("active",  "Farm jungle",             SCRIPT_PARAM_ONKEYDOWN, false, string.byte("X"))
         menu.jungle:addParam("orbwalk", "Orbwalk while farming",   SCRIPT_PARAM_ONOFF,     true)
         menu.jungle:addParam("smart",   "Smart combo (Smite + Q)", SCRIPT_PARAM_ONOFF,     true)
         menu.jungle:addParam("draw",    "Draw jungle stuff",       SCRIPT_PARAM_ONOFF,     true)
@@ -147,14 +147,14 @@ function OnLoad()
         menu.debug:addParam("cooldownQ",   "Cooldown for Q: ",            SCRIPT_PARAM_INFO, 0)
         menu.debug:addParam("hitsWhileCD", "AA hits while Q cooldown: ",  SCRIPT_PARAM_INFO, 0);
 
-    menu:addParam("disabled",    "Disable Stacking               ", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("T"))
+    menu:addParam("disabled",    "Disable Stacking               ", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("X"))
     menu:addParam("disabledT",   "Disable Stacking (Toggle)               ", SCRIPT_PARAM_ONKEYTOGGLE, false, string.byte("Y"))
     menu:addParam("drawRange",   "Draw auto-attack range",           SCRIPT_PARAM_ONOFF,       true)
     menu:addParam("drawIndic",   "Draw damage indicator on enemies", SCRIPT_PARAM_ONOFF,       true)
     menu:addParam("markMinions", "Mark killable minions",            SCRIPT_PARAM_ONOFF,       true)
     menu:addParam("version",     "Installed Version:",               SCRIPT_PARAM_INFO,        version)
-    menu:addParam("combo", "Combo", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("T"))
-    menu:addParam("escape", "Escape", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("S"))
+    menu:addParam("combo", "Combo", SCRIPT_PARAM_ONKEYDOWN, false, 32)
+    menu:addParam("escape", "Escape", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("C"))
     
     print("<font color=\"#0DF8FF\">BlackNasus Loaded Successfully</font> ")
 
