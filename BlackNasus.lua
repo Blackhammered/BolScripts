@@ -1,6 +1,6 @@
 if myHero.charName ~= "Nasus" then return end
 
-local version = 1.06
+local version = 1.07
 local AUTOUPDATE = true
 
 require "SOW"
@@ -145,11 +145,11 @@ function OnLoad()
 			config.masteries:addParam("butcher", "Butcher", SCRIPT_PARAM_SLICE, 0, 0, 1, 0)
         	config.masteries:addParam("arcane", "Arcane Blade", SCRIPT_PARAM_SLICE, 0, 0, 1, 0)
         	config.masteries:addParam("havoc", "Havoc", SCRIPT_PARAM_SLICE, 0, 0, 1, 0)
-		config:addSubMenu("Combo Settings", "combo")
-			config.combo:addParam("autoR", "Auto Ult", SCRIPT_PARAM_ONOFF, false)
-			config.combo:addParam("minR", "Auto Ult when x # of enemies in range", SCRIPT_PARAM_SLICE, 1, 0, 5, 0)
-        	config.combo:addParam("ks", "KS with Q and E", SCRIPT_PARAM_ONOFF, false)
-        	config.combo:addParam("gapClose", "Auto W Gapclosers", SCRIPT_PARAM_ONOFF, false)
+		config:addSubMenu("Combo Settings", "comboset")
+			config.comboset:addParam("autoR", "Auto Ult", SCRIPT_PARAM_ONOFF, false)
+			config.comboset:addParam("minR", "Auto Ult when x # of enemies in range", SCRIPT_PARAM_SLICE, 1, 0, 5, 0)
+        	config.comboset:addParam("ks", "KS with Q and E", SCRIPT_PARAM_ONOFF, false)
+        	config.comboset:addParam("gapClose", "Auto W Gapclosers", SCRIPT_PARAM_ONOFF, false)
         config:addSubMenu("Debug Info", "debug")
         	config.debug:addParam("lastdmg",     "Last Q damage calculated: ", SCRIPT_PARAM_INFO, 0);
         	config.debug:addParam("sep", "", SCRIPT_PARAM_INFO, "");
@@ -199,9 +199,9 @@ function OnTick()
   
   if config.escape then escape() end
   
-  if Rready and config.combo.autoR then autoult() end
+  if Rready and config.comboset.autoR then autoult() end
   
-  if config.combo.ks then ks() end
+  if config.comboset.ks then ks() end
     
   
   Qready = (myHero:CanUseSpell(_Q) == READY)
