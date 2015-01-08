@@ -174,7 +174,7 @@ function OnTick()
 
     -- Update debug config
 
-        menu.debug.lastdmg     = debug["LastDamage"]
+        config.debug.lastdmg = debug["LastDamage"]
     if jungleLib then config.debug.jungleCount = jungleLib:MobCount(true, TRUE_RANGE * 2) end
     config.debug.attackSpeed = attackSpeed
     config.debug.hitsWhileCD = debug["HitsWhileCooldown"]
@@ -347,7 +347,7 @@ function clearJungle()
 
         local damageWhileCooldown = hitsWhileCooldown * damageAA
 
-        if menu.jungle.orbwalk and ValidTarget(mob, TRUE_RANGE) or not menu.jungle.orbwalk and ValidTarget(mob, TRUE_RANGE * 2) then
+        if config.jungle.orbwalk and ValidTarget(mob, TRUE_RANGE) or not config.jungle.orbwalk and ValidTarget(mob, TRUE_RANGE * 2) then
             if (damageQ >= mob.health or mob.health > damageWhileCooldown + damageQ) and (player:CanUseSpell(_Q) == READY or buffActive) then
                 if not buffActive then packetCast(_Q) end
                 packetAttack(mob)
@@ -367,7 +367,7 @@ function clearJungle()
     end
 
     -- Jungle orbwalker
-    if menu.jungle.orbwalk and GetTickCount() + GetLatency() / 2 > lastAttack + lastWindUpTime + 20 then
+    if config.jungle.orbwalk and GetTickCount() + GetLatency() / 2 > lastAttack + lastWindUpTime + 20 then
         moveToMouse()
     end
 
@@ -383,7 +383,7 @@ function OnProcessSpell(unit, spell)
         lastWindUpTime = spell.windUpTime * 1000
         lastAttackCD = spell.animationTime * 1000
     end
-    if menu.combo.gapClose and Wready then
+    if config.combo.gapClose and Wready then
       if unit.team ~= myHero.team then
         local spellName = spell.name
         if DashList[unit.charName] and spellName == DashList[unit.charName].spell and GetDistance(unit) < 2000 then
@@ -463,7 +463,7 @@ function calculateDamage(target, bonusDamage)
     -- read initial armor and damage values
     local armorPenPercent = player.armorPenPercent
     local armorPen = player.armorPen
-    local totalDamage = (player.totalDamage + (bonusDamage or 0) + (menu.masteries.butcher == 1 and 2 or 0)) * (menu.masteries.havoc == 1 and 1.03 or 1)
+    local totalDamage = (player.totalDamage + (bonusDamage or 0) + (config.masteries.butcher == 1 and 2 or 0)) * (config.masteries.havoc == 1 and 1.03 or 1)
     local damageMultiplier = 1
 
     -- turrets ignore armor penetration and critical attacks
@@ -485,7 +485,7 @@ function calculateDamage(target, bonusDamage)
     end
 
     -- calculate damage dealt including masteries
-    return damageMultiplier * totalDamage + (menu.masteries.arcane == 1 and (player:CalcMagicDamage(target, 0.05 * player.ap)) or 0) 
+    return damageMultiplier * totalDamage + (config.masteries.arcane == 1 and (player:CalcMagicDamage(target, 0.05 * player.ap)) or 0) 
 end
 
 function isInside(target, distance, source)
